@@ -12,7 +12,15 @@ I'll modify this project to send the picture via ESP-NOW to a companion device, 
 
 Finally I'll do something with the ESP-NOW companion device (to make the pictures available on the home WiFi network) - but I've ont got that far yet.
 
+
+
 ### Part 1: capture the picture using a PIR
 Managed to compile the software, but the camera is duff.. new bits are on order
 
+#### ESP32 S3 WROOM - it's pretty cool. 
 
+I've upgraded the hardware to the ESP32 S3 WROOM board.
+
+There's some excellent tutorials on the [Freenove Github page](https://github.com/Freenove/Freenove_ESP32_S3_WROOM_Board) of which I'm following the 'C' tutorial to try and get the new hardware to work.. mainly by removing some bits from the previous tutorial and changing some of the pins. 
+
+So far the SD card and the camera are recognised.
