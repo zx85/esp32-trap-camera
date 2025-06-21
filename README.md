@@ -33,4 +33,5 @@ Library: SDFat by by Bill Greiman (2.3.0)
 
 
 
-So far the SD card and the camera are recognised.
+So far the SD card and the camera are recognised, and it can take a photo.
+Next - motion detection.
