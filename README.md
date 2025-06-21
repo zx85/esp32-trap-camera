@@ -23,4 +23,14 @@ I've upgraded the hardware to the ESP32 S3 WROOM board.
 
 There's some excellent tutorials on the [Freenove Github page](https://github.com/Freenove/Freenove_ESP32_S3_WROOM_Board) of which I'm following the 'C' tutorial to try and get the new hardware to work.. mainly by removing some bits from the previous tutorial and changing some of the pins. 
 
+#### Arduino IDE setup
+ 
+File - Preferences - Additional Boards Manager URLs - https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
+
+Boards Manager - look for ESP32 by Espressif Systems - Add (3.2.0)
+
+Library: SDFat by by Bill Greiman (2.3.0)
+
+
+
 So far the SD card and the camera are recognised.
