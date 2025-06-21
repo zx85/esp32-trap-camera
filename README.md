@@ -31,6 +31,7 @@ Boards Manager - look for ESP32 by Espressif Systems - Add (3.2.0)
 
 Library: SDFat by by Bill Greiman (2.3.0)
 
+Use the ESP32S3 Dev Module as the board
 
 
 So far the SD card and the camera are recognised, and it can take a photo.
