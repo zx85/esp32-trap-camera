@@ -2,7 +2,11 @@
 #include "SD_MMC.h"            // SD Card ESP32
 #include <EEPROM.h>            // read and write from flash memory
 #include "esp_camera.h"
-
+#include "driver/rtc_io.h"
+#include <EEPROM.h>            // read and write from flash memory
+// define the number of bytes you want to access
+#define EEPROM_SIZE 1
+ 
 
 #define CAMERA_MODEL_ESP32S3_EYE // Has PSRAM
 
@@ -13,6 +17,7 @@
 #define SD_MMC_CLK 39 //Please do not modify it.
 #define SD_MMC_D0 40 //Please do not modify it
 
+int pictureNumber = 0;
 
 void setup(){
   Serial.begin(115200);
@@ -91,7 +96,49 @@ void setup(){
   s->set_vflip(s, 1); // flip it back
   s->set_brightness(s, 1); // up the brightness just a bit
 
-}
+  camera_fb_t * fb = NULL;
+    Serial.println("Attempting to take a picture...");
+// Take Picture with Camera
+  fb = esp_camera_fb_get();  
+  if(!fb) {
+    Serial.println("Camera capture failed");
+    return;
+  }
+  // initialize EEPROM with predefined size
+  EEPROM.begin(EEPROM_SIZE);
+  pictureNumber = EEPROM.read(0) + 1;
+ 
+  // Path where new picture will be saved in SD Card
+  String path = "/picture" + String(pictureNumber) +".jpg";
+ 
+  fs::FS &fs = SD_MMC;
+  Serial.printf("Picture file name: %s\n", path.c_str());
+ 
+  File file = fs.open(path.c_str(), FILE_WRITE);
+  if(!file){
+    Serial.println("Failed to open file in writing mode");
+  }
+  else {
+    file.write(fb->buf, fb->len); // payload (image), payload length
+    Serial.printf("Saved file to path: %s\n", path.c_str());
+    EEPROM.write(0, pictureNumber);
+    EEPROM.commit();
+  }
+  file.close();
+  esp_camera_fb_return(fb);
+  
+  delay(1000);
+  
+  esp_sleep_enable_ext0_wakeup(GPIO_NUM_14, 1);
+  rtc_gpio_pullup_dis(GPIO_NUM_14);
+  rtc_gpio_pulldown_en(GPIO_NUM_14);
+ 
+  Serial.println("Going to sleep now");
+  delay(1000);
+  esp_deep_sleep_start();
+  Serial.println("This will never be printed");
+} 
+
 
 void loop(){
 delay(10000);
