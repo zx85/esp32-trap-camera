@@ -2,22 +2,40 @@
 #include "SD_MMC.h"            // SD Card ESP32
 #include <EEPROM.h>            // read and write from flash memory
 #include "esp_camera.h"
+#include "functions.h"
 #include "driver/rtc_io.h"
 #include <EEPROM.h>            // read and write from flash memory
 // define the number of bytes you want to access
 #define EEPROM_SIZE 1
  
 
+// camera dedinition
 #define CAMERA_MODEL_ESP32S3_EYE // Has PSRAM
-
 #include "camera_pins.h"
 
-
+// SD card
 #define SD_MMC_CMD 38 //Please do not modify it.
 #define SD_MMC_CLK 39 //Please do not modify it.
 #define SD_MMC_D0 40 //Please do not modify it
 
-int pictureNumber = 0;
+// for esp now connect
+unsigned long lastConnectNowAttempt;
+unsigned long nextConnectNowGap = 1000;
+bool isPaired = 0;
+
+// for photo name
+int pictureNumber = 1;
+byte takeNextPhotoFlag = 0;
+
+// for photo transmit
+int currentTransmitCurrentPosition = 0;
+int currentTransmitTotalPackages = 0;
+byte sendNextPackageFlag = 0;
+String fileName = "/pic.jpg";
+
+// for connection type
+bool useUartRX = 0;
+
 
 void setup(){
   Serial.begin(115200);
@@ -46,6 +64,10 @@ void setup(){
   uint64_t cardSize = SD_MMC.cardSize() / (1024 * 1024);
   Serial.printf("SD_MMC Card Size: %lluMB\n", cardSize);
 
+
+  // ESPNow business
+
+  InitESPNow();
   // define camera bits
   camera_config_t config;
   config.ledc_channel = LEDC_CHANNEL_0;

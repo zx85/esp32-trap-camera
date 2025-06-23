@@ -36,3 +36,20 @@ Use the ESP32S3 Dev Module as the board
 
 So far the SD card and the camera are recognised, and it can take a photo.
 Next - motion detection.
+
+That's running on pin14 - I'm using an SR602 sensor running on the 3.3V port
+https://www.amazon.co.uk/dp/B0BGPDMWP9
+
+#### ESPNOW
+
+#### ESPS2mini ESPNow to Telegram
+
+`esp-now-receiver.ino`
+
+I'm using [this project](https://github.com/talofer99/ESP32CAM-Capture-and-send-image-over-esp-now) to transfer the image over esp-now
+
+...and I'm following [this guide](https://randomnerdtutorials.com/telegram-esp32-cam-photo-arduino/) from Random Nerd Tutorials to send it to Telegram from the receiving device
+
+Libararies:
+- Universal-Arduino-Telegram-Bot-master.zip (in libraries)
+- Arduino JSON library ()

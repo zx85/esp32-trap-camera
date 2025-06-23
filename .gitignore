@@ -10,6 +10,7 @@
 *.userosscache
 *.sln.docstates
 docs
+credentials.h
 
 
 # User-specific files (MonoDevelop/Xamarin Studio)
