@@ -2,11 +2,11 @@
 #include "SD_MMC.h"            // SD Card ESP32
 #include <EEPROM.h>            // read and write from flash memory
 #include "esp_camera.h"
-#include "functions.h"
+#include "esp_now_functions.h"
 #include "driver/rtc_io.h"
 #include <EEPROM.h>            // read and write from flash memory
 // define the number of bytes you want to access
-#define EEPROM_SIZE 1
+#define EEPROM_SIZE 4
  
 
 // camera dedinition
@@ -97,12 +97,16 @@ void setup(){
   config.fb_count = 1;
   // if PSRAM IC present, init with UXGA resolution and higher JPEG quality
   // for larger pre-allocated frame buffer.
+  Serial.printf("Total PSRAM: %d", ESP.getPsramSize());
   if(psramFound()){
   config.jpeg_quality = 10;
   config.fb_count = 2;
   config.grab_mode = CAMERA_GRAB_LATEST;
+  Serial.print("PSRAM found");
+
   } else {
   // Limit the frame size when PSRAM is not available
+  Serial.print("PSRAM not found");
   config.frame_size = FRAMESIZE_SVGA;
   config.fb_location = CAMERA_FB_IN_DRAM;
   }
