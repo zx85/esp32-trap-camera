@@ -53,3 +53,11 @@ I'm using [this project](https://github.com/talofer99/ESP32CAM-Capture-and-send-
 Libararies:
 - Universal-Arduino-Telegram-Bot-master.zip (in libraries)
 - Arduino JSON library ()
+
+#### Notes
+
+I'm using a board based on the Espressif ESP32-S2 mini, and I was finding that when I uploaded the software, it wouldn't enable the serial port, so I couldn't see what was going on.
+
+This, apparently, is because the ESP32-S2 mini uses its own native USB device for communication, and it needs to be enabled. This is done in the Arduino IDE by going to Tools -> USB CDC On Boot -> Enabled
+
+I'd not seen this before. s
