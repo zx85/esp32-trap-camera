@@ -1,37 +1,32 @@
 /*
-    ESP-NOW Broadcast Slave
+    ESP-NOW Broadcast Receiver
     Lucas Saavedra Vaz - 2024
 
     This sketch demonstrates how to receive broadcast messages from a master device using the ESP-NOW protocol.
 
-    The master device will broadcast a message every 5 seconds to all devices within the network.
+    The sender device will broadcast a message every 5 seconds to all devices within the network.
 
-    The slave devices will receive the broadcasted messages. If they are not from a known master, they will be registered as a new master
+    The receiver devices will receive the broadcasted messages. If they are not from a known sender, they will be registered as a new sender
     using a callback function.
 */
 
-#include <esp_now.h>
-#include <WiFi.h>
 #define CHANNEL 1
-
 #include <SPIFFS.h>
-// #include <telegram_functions.h>
+
 #include <esp_now_functions.h>
 #include <wifi_functions.h>
+// #include <telegram_functions.h>
 
 int currentTransmitCurrentPosition = 0;
 int currentTransmitTotalPackages = 0;
 byte showImage = 0;
 byte awaitImage = 1;
 
-// Telegram setup
-WiFiClientSecure clientTCP;
-UniversalTelegramBot bot(BOTtoken, clientTCP);
 
 
 void setup() {
   Serial.begin(115200);
-  Serial.println("ESPNow/Basic/Secondary Example");
+  Serial.println("ESPNow/Sender/Receiver Example");
 
  if (!SPIFFS.begin())
   {
@@ -51,10 +46,13 @@ void loop() {
     {
     awaitImage = 0;
     //Set device in AP mode to begin with
-    InitESPNow();
+    delay(5000);
+    Serial.printf("In the first loop");
+    // InitESPNow();
+
     // Once ESPNow is successfully Init, we will register for recv CB to
     // get recv packer info.
-    esp_now_register_recv_cb(OnDataRecv);
+    // esp_now_register_recv_cb(OnDataRecv);
     }
 
   // if show image flag
@@ -62,7 +60,7 @@ void loop() {
   {
     showImage = 0;
     unsigned long start = millis();
-    InitWifi();
+    InitWiFi();
     delay(5000);
     Serial.printf("Time used: %lu\n", millis() - start);
     awaitImage = 1;
@@ -72,8 +70,9 @@ void loop() {
 
 
 // callback when data is recv from Master
-void OnDataRecv(const uint8_t *mac_addr, const uint8_t *data, int data_len) {
-
+void OnDataRecv(const esp_now_recv_info *recv_info, const uint8_t *data, int data_len) {
+  const uint8_t *mac_addr = recv_info->src_addr;
+  
   switch (*data++)
   {
     case 0x01:

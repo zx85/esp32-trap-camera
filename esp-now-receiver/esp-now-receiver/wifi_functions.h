@@ -7,7 +7,7 @@
 #include <WiFi.h>
 #include <UniversalTelegramBot.h>
 #include <WiFiClientSecure.h>
-
+WiFiClientSecure clientTCP;
 void InitWiFi() {
    // Connect to Wi-Fi
   WiFi.mode(WIFI_STA);
@@ -15,6 +15,7 @@ void InitWiFi() {
   Serial.print("Connecting to ");
   Serial.println(WIFI_SSID);
   WiFi.begin(WIFI_SSID, WIFI_PASS);
+  WiFiClientSecure clientTCP;
   clientTCP.setCACert(TELEGRAM_CERTIFICATE_ROOT); // Add root certificate for api.telegram.org
   while (WiFi.status() != WL_CONNECTED) {
     Serial.print(".");

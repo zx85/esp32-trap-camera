@@ -6,6 +6,10 @@
 #include <ArduinoJson.h>
 #include <credentials.h>
 
+// Telegram setup
+UniversalTelegramBot bot(BOTtoken, clientTCP);
+
+
 String sendPhotoTelegram() {
   const char* myDomain = "api.telegram.org";
   String getAll = "";

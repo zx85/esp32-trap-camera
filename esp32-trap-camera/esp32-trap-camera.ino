@@ -4,10 +4,9 @@
 #include "esp_camera.h"
 #include "esp_now_functions.h"
 #include "driver/rtc_io.h"
-#include <EEPROM.h>            // read and write from flash memory
 // define the number of bytes you want to access
-#define EEPROM_SIZE 4
- 
+#define EEPROM_SIZE 3
+#define MAX_PICTURES 512000
 
 // camera dedinition
 #define CAMERA_MODEL_ESP32S3_EYE // Has PSRAM
@@ -31,11 +30,30 @@ byte takeNextPhotoFlag = 0;
 int currentTransmitCurrentPosition = 0;
 int currentTransmitTotalPackages = 0;
 byte sendNextPackageFlag = 0;
-String fileName = "/pic.jpg";
 
 // for connection type
 bool useUartRX = 0;
 
+unsigned long getPictureNumber() {
+  unsigned long value = 0;
+  value |= (unsigned long)EEPROM.read(0);
+  value |= ((unsigned long)EEPROM.read(1)) << 8;
+  value |= ((unsigned long)EEPROM.read(2)) << 16;
+  return value;
+}
+
+void setPictureNumber(unsigned long value) {
+  EEPROM.write(0, value & 0xFF);
+  EEPROM.write(1, (value >> 8) & 0xFF);
+  EEPROM.write(2, (value >> 16) & 0xFF);
+  EEPROM.commit();
+}
+
+String getPictureFilename(unsigned long number) {
+  char filename[12]; // enough space: "000000.jpg\0"
+  sprintf(filename, "%06lu.jpg", number); 
+  return String(filename);
+}
 
 void setup(){
   Serial.begin(115200);
@@ -132,10 +150,14 @@ void setup(){
   }
   // initialize EEPROM with predefined size
   EEPROM.begin(EEPROM_SIZE);
-  pictureNumber = EEPROM.read(0) + 1;
- 
+  unsigned long pictureNumber = getPictureNumber();
+  pictureNumber = (pictureNumber + 1) % MAX_PICTURES;
+    
+  String filename = getPictureFilename(pictureNumber);
+  Serial.println("Saving picture as: " + filename);
+
   // Path where new picture will be saved in SD Card
-  String path = "/picture" + String(pictureNumber) +".jpg";
+  String path = "/" + filename;
  
   fs::FS &fs = SD_MMC;
   Serial.printf("Picture file name: %s\n", path.c_str());
@@ -147,8 +169,7 @@ void setup(){
   else {
     file.write(fb->buf, fb->len); // payload (image), payload length
     Serial.printf("Saved file to path: %s\n", path.c_str());
-    EEPROM.write(0, pictureNumber);
-    EEPROM.commit();
+    setPictureNumber(pictureNumber);
   }
   file.close();
   esp_camera_fb_return(fb);
