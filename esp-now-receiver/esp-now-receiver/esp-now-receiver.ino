@@ -8,6 +8,8 @@
 
     The receiver devices will receive the broadcasted messages. If they are not from a known sender, they will be registered as a new sender
     using a callback function.
+
+    Receiver MAC address: 80:65:99:EB:2D:21
 */
 
 #define CHANNEL 1
@@ -26,18 +28,17 @@ byte awaitImage = 1;
 
 void setup() {
   Serial.begin(115200);
-  Serial.println("ESPNow/Sender/Receiver Example");
 
- if (!SPIFFS.begin())
-  {
-    Serial.println(F("ERROR: File System Mount Failed!"));
-  }
-  else
-  {
-    Serial.println(F("success init spifss"));
-  }
+//   Serial.println("ESPNow/Sender/Receiver Example");
 
-
+//  if (!SPIFFS.begin())
+//   {
+//     Serial.println(F("ERROR: File System Mount Failed!"));
+//   }
+//   else
+//   {
+//     Serial.println(F("success init spifss"));
+//   }
 }
 
 void loop() {
@@ -47,14 +48,17 @@ void loop() {
     awaitImage = 0;
     //Set device in AP mode to begin with
     delay(5000);
-    Serial.printf("In the first loop");
-    // InitESPNow();
-
+    Serial.println("In the first loop");
+    Serial.println("Running InitESPNow");
+    InitESPNow();
+    Serial.println("InitESPNow complete");
     // Once ESPNow is successfully Init, we will register for recv CB to
     // get recv packer info.
-    // esp_now_register_recv_cb(OnDataRecv);
+    esp_now_register_recv_cb(OnDataRecv);
     }
-
+  delay(5000);
+  Serial.println("In the main loop");
+  
   // if show image flag
   if (showImage)
   {

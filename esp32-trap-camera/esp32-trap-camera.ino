@@ -1,21 +1,16 @@
-#include "FS.h"                // SD Card ESP32
-#include "SD_MMC.h"            // SD Card ESP32
+
 #include <EEPROM.h>            // read and write from flash memory
 #include "esp_camera.h"
-#include "esp_now_functions.h"
+#include "includes/SD_helper.h"
+#include "includes/esp_now_functions.h"
 #include "driver/rtc_io.h"
 // define the number of bytes you want to access
 #define EEPROM_SIZE 3
-#define MAX_PICTURES 512000
+#define MAX_PICTURES 12000
 
 // camera dedinition
 #define CAMERA_MODEL_ESP32S3_EYE // Has PSRAM
-#include "camera_pins.h"
-
-// SD card
-#define SD_MMC_CMD 38 //Please do not modify it.
-#define SD_MMC_CLK 39 //Please do not modify it.
-#define SD_MMC_D0 40 //Please do not modify it
+#include "includes/camera_pins.h"
 
 // for esp now connect
 unsigned long lastConnectNowAttempt;
@@ -58,30 +53,20 @@ String getPictureFilename(unsigned long number) {
 void setup(){
   Serial.begin(115200);
   delay(500);
-  SD_MMC.setPins(SD_MMC_CLK, SD_MMC_CMD, SD_MMC_D0);
-  if (!SD_MMC.begin("/sdcard", true)) { // true enables 1-bit mode to free up GPIOs
-    Serial.println("SD Card Mount Failed");
-    //return;
-  }
-  uint8_t cardType = SD_MMC.cardType();
-  if(cardType == CARD_NONE){
-    Serial.println("No SD Card attached");
-    return;
+
+  if (!initSDMMC(true)) {  // true = 1-bit mode
+    Serial.println("SD init failed, halting");
+    while (1) delay(100);
   }
 
-  Serial.print("SD_MMC Card Type: ");
-  if(cardType == CARD_MMC){
-    Serial.println("MMC");
-    } else if(cardType == CARD_SD){
-    Serial.println("SDSC");
-    } else if(cardType == CARD_SDHC){
-    Serial.println("SDHC");
-    } else {
-    Serial.println("UNKNOWN");
-  }
-  uint64_t cardSize = SD_MMC.cardSize() / (1024 * 1024);
-  Serial.printf("SD_MMC Card Size: %lluMB\n", cardSize);
-
+  // initialize EEPROM with predefined size and set filename
+  EEPROM.begin(EEPROM_SIZE);
+  unsigned long pictureNumber = getPictureNumber();
+  pictureNumber = (pictureNumber + 1) % MAX_PICTURES;
+        
+  String filename = getPictureFilename(pictureNumber);
+  // Path where new picture will be saved in SD Card
+  String path = "/" + filename;
 
   // ESPNow business
 
@@ -111,7 +96,7 @@ void setup(){
   config.pixel_format = PIXFORMAT_JPEG; // for streaming
   config.grab_mode = CAMERA_GRAB_WHEN_EMPTY;
   config.fb_location = CAMERA_FB_IN_PSRAM;
-  config.jpeg_quality = 12;
+  config.jpeg_quality = 9;
   config.fb_count = 1;
   // if PSRAM IC present, init with UXGA resolution and higher JPEG quality
   // for larger pre-allocated frame buffer.
@@ -148,26 +133,24 @@ void setup(){
     Serial.println("Camera capture failed");
     return;
   }
-  // initialize EEPROM with predefined size
-  EEPROM.begin(EEPROM_SIZE);
-  unsigned long pictureNumber = getPictureNumber();
-  pictureNumber = (pictureNumber + 1) % MAX_PICTURES;
-    
-  String filename = getPictureFilename(pictureNumber);
-  Serial.println("Saving picture as: " + filename);
 
-  // Path where new picture will be saved in SD Card
-  String path = "/" + filename;
- 
-  fs::FS &fs = SD_MMC;
+  Serial.printf("Captured %d bytes\n", fb->len);
+
+
   Serial.printf("Picture file name: %s\n", path.c_str());
- 
-  File file = fs.open(path.c_str(), FILE_WRITE);
+
+  // Open the file directly using SD_MMC, not through a directory File object
+  File file = SD_MMC.open(path.c_str(), FILE_WRITE);
   if(!file){
     Serial.println("Failed to open file in writing mode");
+    return;
   }
   else {
-    file.write(fb->buf, fb->len); // payload (image), payload length
+    const size_t chunkSize = 1024;
+    for (size_t i = 0; i < fb->len; i += chunkSize) {
+      size_t bytesToWrite = (i + chunkSize < fb->len) ? chunkSize : (fb->len - i);
+      file.write(fb->buf + i, bytesToWrite);
+    }
     Serial.printf("Saved file to path: %s\n", path.c_str());
     setPictureNumber(pictureNumber);
   }

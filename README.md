@@ -27,11 +27,11 @@ There's some excellent tutorials on the [Freenove Github page](https://github.co
  
 File - Preferences - Additional Boards Manager URLs - https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
 
-Boards Manager - look for ESP32 by Espressif Systems - Add (3.2.0)
+Boards Manager - look for ESP32 by Espressif Systems - Add (3.3.0) This has its own SD card libary, so 
+SDFat by by Bill Greiman (2.3.0) is not required.
 
-Library: SDFat by by Bill Greiman (2.3.0)
 
-Use the ESP32S3 Dev Module as the board
+Use the **ESP32S3 Dev Module** as the board (you'll get all sorts of errors if you don't)
 
 
 So far the SD card and the camera are recognised, and it can take a photo.
