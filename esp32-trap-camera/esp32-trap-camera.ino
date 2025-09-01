@@ -6,7 +6,7 @@
 #include "driver/rtc_io.h"
 // define the number of bytes you want to access
 #define EEPROM_SIZE 3
-#define MAX_PICTURES 12000
+#define MAX_PICTURES 32000
 
 // camera dedinition
 #define CAMERA_MODEL_ESP32S3_EYE // Has PSRAM
